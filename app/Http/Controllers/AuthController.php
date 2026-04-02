@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -58,20 +59,23 @@ class AuthController extends Controller
             ]); 
      
             if($validator->fails()) {
-             return response()->json([
-                 'status' => false,
-                 'message' => 'validation error',
-                 'error' => $validator->errors()
-             ], 422);
+            //  return response()->json([
+            //      'status' => false,
+            //      'message' => 'validation error',
+            //      'error' => $validator->errors()
+            //  ], 422);
+
+            return ResponseHelper::eror('validation error', $validator->errors(), 422);
             }
 
             $user = User::where('email', $request->email)->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                 'status' => false,
-                 'message' => 'Invalid credential!',
-             ], 401);
+            //     return response()->json([
+            //      'status' => false,
+            //      'message' => 'Invalid credential!',
+            //  ], 401);
+             return ResponseHelper::eror('Invalid credential!!','', 401);
             }
 
             $token= $user->createToken('auth_token')->plainTextToken;
@@ -80,14 +84,15 @@ class AuthController extends Controller
              'message' => 'Login Success',
              'data' => $user,
              'token' => $token,
-            ]);
+            ] );
         } catch (\Throwable $th) {
             //throw $th;
-            return response()->json([
-                'status' => false,
-                'message' => 'Internal server error',
-                'error' => $th->getMessage()//tidak boleh dimunculkan di prod
-            ], 500);
+            // return response()->json([
+            //     'status' => false,
+            //     'message' => 'Internal server error',
+            //     'error' => $th->getMessage()//tidak boleh dimunculkan di prod
+            // ], 500);
+            return ResponseHelper::eror('vInternal Server Eror', $th->getMessage(), 500);
         }
     }
 }
